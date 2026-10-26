@@ -1,7 +1,7 @@
 #include "gpio_driver.h"
 #include "stm32f407xx.h"
 
-#define LED_PINS (0x0FU << 12U)
+#define LED_PINS (0x07 << 13)
 
 void GpioDriver_Init(void)
 {
@@ -9,16 +9,15 @@ void GpioDriver_Init(void)
     (void)RCC->AHB1ENR;
 
     GPIOD->ODR &= ~LED_PINS;
-    GPIOD->MODER &= ~(0xFFU << 24U);
-    GPIOD->MODER |= (0x55U << 24U);
+    GPIOD->MODER &= ~(0x3F << 26);
+    GPIOD->MODER |= (0x15 << 26);
     GPIOD->OTYPER &= ~LED_PINS;
-    GPIOD->OSPEEDR &= ~(0xFFU << 24U);
-    GPIOD->OSPEEDR |= (0xAAU << 24U);
-    GPIOD->PUPDR &= ~(0xFFU << 24U);
+    GPIOD->OSPEEDR &= ~(0x3F << 26);
+    GPIOD->PUPDR &= ~(0x3F << 26);
 }
 
 void GpioDriver_SetLeds(uint8_t mask)
 {
-    uint32_t pins = ((uint32_t)mask & 0x0FU) << 12U;
-    GPIOD->BSRR = ((LED_PINS & ~pins) << 16U) | pins;
+    uint32_t pins = ((uint32_t)mask & 0x07) << 13;
+    GPIOD->BSRR = ((LED_PINS & ~pins) << 16) | pins;
 }

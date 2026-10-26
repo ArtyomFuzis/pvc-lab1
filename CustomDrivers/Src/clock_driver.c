@@ -2,42 +2,47 @@
 #include "stm32f407xx.h"
 #include "system_stm32f4xx.h"
 
-#define CLOCK_STARTUP_TIMEOUT 1000000U
+#define CLOCK_STARTUP_TIMEOUT 1000000
 
 static uint8_t WaitForRegister(volatile uint32_t *reg, uint32_t mask, uint32_t expected)
 {
     uint32_t timeout = CLOCK_STARTUP_TIMEOUT;
 
-    while (((*reg) & mask) != expected && timeout > 0U) {
+    while (((*reg) & mask) != expected && timeout > 0) {
         timeout--;
     }
 
-    return (uint8_t)(timeout > 0U);
+    return (uint8_t)(timeout > 0);
 }
 
-static void SwitchToHsi(void)
+static uint8_t SwitchToHsi(void)
 {
     RCC->CR |= RCC_CR_HSION;
-    (void)WaitForRegister(&RCC->CR, RCC_CR_HSIRDY, RCC_CR_HSIRDY);
+    if (!WaitForRegister(&RCC->CR, RCC_CR_HSIRDY, RCC_CR_HSIRDY)) {
+        return 0;
+    }
 
     RCC->CFGR &= ~RCC_CFGR_SW;
-    (void)WaitForRegister(&RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_HSI);
+    if (!WaitForRegister(&RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_HSI)) {
+        return 0;
+    }
 
     RCC->CR &= ~RCC_CR_PLLON;
     RCC->CR &= ~RCC_CR_HSEON;
     SystemCoreClockUpdate();
+    return 1;
 }
 
 uint8_t ClockDriver_Init(void)
 {
     RCC->CR |= RCC_CR_HSION;
     if (!WaitForRegister(&RCC->CR, RCC_CR_HSIRDY, RCC_CR_HSIRDY)) {
-        return 0U;
+        return 0;
     }
 
     RCC->CFGR &= ~RCC_CFGR_SW;
     if (!WaitForRegister(&RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_HSI)) {
-        return 0U;
+        return 0;
     }
 
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
@@ -46,19 +51,17 @@ uint8_t ClockDriver_Init(void)
 
     RCC->CR |= RCC_CR_HSEON;
     if (!WaitForRegister(&RCC->CR, RCC_CR_HSERDY, RCC_CR_HSERDY)) {
-        SwitchToHsi();
-        return 0U;
+        return SwitchToHsi();
     }
 
-    RCC->PLLCFGR = 25U
-                 | (336U << RCC_PLLCFGR_PLLN_Pos)
+    RCC->PLLCFGR = 25
+                 | (336 << RCC_PLLCFGR_PLLN_Pos)
                  | RCC_PLLCFGR_PLLSRC_HSE
-                 | (4U << RCC_PLLCFGR_PLLQ_Pos);
+                 | (4 << RCC_PLLCFGR_PLLQ_Pos);
 
     RCC->CR |= RCC_CR_PLLON;
     if (!WaitForRegister(&RCC->CR, RCC_CR_PLLRDY, RCC_CR_PLLRDY)) {
-        SwitchToHsi();
-        return 0U;
+        return SwitchToHsi();
     }
 
     FLASH->ACR = FLASH_ACR_ICEN
@@ -71,10 +74,9 @@ uint8_t ClockDriver_Init(void)
     RCC->CFGR |= RCC_CFGR_SW_PLL;
 
     if (!WaitForRegister(&RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL)) {
-        SwitchToHsi();
-        return 0U;
+        return SwitchToHsi();
     }
 
     SystemCoreClockUpdate();
-    return 1U;
+    return 1;
 }

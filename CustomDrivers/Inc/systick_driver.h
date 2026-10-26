@@ -6,6 +6,5 @@
 void SystickDriver_Init(void);
 void SystickDriver_OnInterrupt(void);
 uint32_t SystickDriver_GetMilliseconds(void);
-void SystickDriver_Delay(uint32_t milliseconds);
 
 #endif

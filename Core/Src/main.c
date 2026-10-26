@@ -5,73 +5,64 @@
 #include "buttons_driver.h"
 #include "keyboard_driver.h"
 
-#define LED_MASK_ALL 0x0FU
-#define MODE_COUNT 5U
+#define MODE_COUNT 5
+#define LED_MASK_ALL 0x07
 
 static const uint16_t mode_interval_ms[MODE_COUNT] = {
-    130U,
-    180U,
-    300U,
-    180U,
-    500U
+    130,
+    180,
+    300,
+    180,
+    500
 };
 
 static uint8_t PatternFrame(uint8_t mode, uint32_t step)
 {
-    uint8_t position;
-    uint8_t count;
-    uint8_t phase;
+    static const uint8_t two_led_frames[] = {3, 6, 5};
+    static const uint8_t fill_frames[] = {1, 3, 7, 3, 1, 0};
 
     switch (mode) {
-        case 0U:
-            return (uint8_t)(1U << (step % 4U));
-
-        case 1U:
-            position = (uint8_t)(step % 4U);
-            return (uint8_t)((1U << position) | (1U << ((position + 1U) % 4U)));
-
-        case 2U:
-            return ((step % 2U) == 0U) ? 0x05U : 0x0AU;
-
-        case 3U:
-            phase = (uint8_t)(step % 8U);
-            count = (phase <= 3U) ? (uint8_t)(phase + 1U) : (uint8_t)(7U - phase);
-            return (count == 0U) ? 0U : (uint8_t)((1U << count) - 1U);
-
-        case 4U:
-            return ((step % 2U) == 0U) ? LED_MASK_ALL : 0U;
-
+        case 0:
+            return (uint8_t)(1 << (step % 3));
+        case 1:
+            return two_led_frames[step % 3];
+        case 2:
+            return (step % 2 == 0) ? 5 : 2;
+        case 3:
+            return fill_frames[step % 6];
+        case 4:
+            return (step % 2 == 0) ? LED_MASK_ALL : 0;
         default:
-            return 0U;
+            return 0;
     }
 }
 
 void Error_Handler(void)
 {
     __disable_irq();
+    GPIOD->BSRR = 1 << 15;
     while (1) {
-        GPIOD->ODR ^= (1U << 12U);
-        for (volatile uint32_t delay = 0U; delay < 150000U; delay++) {
-            __NOP();
-        }
     }
 }
 
 int main(void)
 {
-    uint8_t mode = 0U;
-    uint32_t step = 0U;
-    uint32_t last_step_at;
+    uint8_t mode = 0;
+    uint32_t step = 0;
+    uint32_t last_frame;
 
-    (void)ClockDriver_Init();
-    SystickDriver_Init();
     GpioDriver_Init();
-    if (KeyboardDriver_Init() == 0U) {
+    if (!ClockDriver_Init()) {
+        Error_Handler();
+    }
+
+    SystickDriver_Init();
+    if (!KeyboardDriver_Init()) {
         Error_Handler();
     }
     ButtonsDriver_Init();
 
-    last_step_at = SystickDriver_GetMilliseconds();
+    last_frame = SystickDriver_GetMilliseconds();
     GpioDriver_SetLeds(PatternFrame(mode, step));
 
     while (1) {
@@ -84,20 +75,20 @@ int main(void)
         previous_pressed = ButtonsDriver_WasPressed(BUTTON_PREVIOUS);
 
         if (next_pressed != previous_pressed) {
-            if (next_pressed != 0U) {
-                mode = (uint8_t)((mode + 1U) % MODE_COUNT);
+            if (next_pressed) {
+                mode = (uint8_t)((mode + 1) % MODE_COUNT);
             } else {
-                mode = (uint8_t)((mode + MODE_COUNT - 1U) % MODE_COUNT);
+                mode = (uint8_t)((mode + MODE_COUNT - 1) % MODE_COUNT);
             }
 
-            step = 0U;
-            last_step_at = now;
+            step = 0;
+            last_frame = now;
             GpioDriver_SetLeds(PatternFrame(mode, step));
             continue;
         }
 
-        if ((uint32_t)(now - last_step_at) >= mode_interval_ms[mode]) {
-            last_step_at = now;
+        if ((uint32_t)(now - last_frame) >= mode_interval_ms[mode]) {
+            last_frame = now;
             step++;
             GpioDriver_SetLeds(PatternFrame(mode, step));
         }
