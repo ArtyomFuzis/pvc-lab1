@@ -1,0 +1,14 @@
+../CustomDrivers/Src/pca9538_driver.c:15:13:BusDelay	16	static,ignoring_inline_asm
+../CustomDrivers/Src/pca9538_driver.c:22:13:SclRelease	4	static
+../CustomDrivers/Src/pca9538_driver.c:27:13:SclLow	4	static
+../CustomDrivers/Src/pca9538_driver.c:32:13:SdaRelease	4	static
+../CustomDrivers/Src/pca9538_driver.c:37:13:SdaLow	4	static
+../CustomDrivers/Src/pca9538_driver.c:42:16:SdaRead	4	static
+../CustomDrivers/Src/pca9538_driver.c:47:13:StartCondition	8	static
+../CustomDrivers/Src/pca9538_driver.c:58:13:StopCondition	8	static
+../CustomDrivers/Src/pca9538_driver.c:68:16:WriteByte	24	static
+../CustomDrivers/Src/pca9538_driver.c:99:16:ReadByte	24	static
+../CustomDrivers/Src/pca9538_driver.c:131:13:GpioBusInit	8	static
+../CustomDrivers/Src/pca9538_driver.c:149:9:Pca9538Driver_WriteRegister	24	static
+../CustomDrivers/Src/pca9538_driver.c:166:9:Pca9538Driver_ReadRegister	24	static
+../CustomDrivers/Src/pca9538_driver.c:194:9:Pca9538Driver_Init	16	static

@@ -47,40 +47,25 @@ void Error_Handler(void)
 
 int main(void)
 {
-    uint8_t mode = 0;
+    uint8_t  mode = 0;
     uint32_t step = 0;
     uint32_t last_frame;
 
     GpioDriver_Init();
-    if (!ClockDriver_Init()) {
-        Error_Handler();
-    }
+    if (!ClockDriver_Init())          Error_Handler();
 
     SystickDriver_Init();
-    if (!KeyboardDriver_Init()) {
-        Error_Handler();
-    }
-    ButtonsDriver_Init();
+    if (!KeyboardDriver_Init())       Error_Handler();
+    ButtonPc15_Init();
 
     last_frame = SystickDriver_GetMilliseconds();
     GpioDriver_SetLeds(PatternFrame(mode, step));
 
     while (1) {
         uint32_t now = SystickDriver_GetMilliseconds();
-        uint8_t next_pressed;
-        uint8_t previous_pressed;
 
-        ButtonsDriver_Update(now);
-        next_pressed = ButtonsDriver_WasPressed(BUTTON_NEXT);
-        previous_pressed = ButtonsDriver_WasPressed(BUTTON_PREVIOUS);
-
-        if (next_pressed != previous_pressed) {
-            if (next_pressed) {
-                mode = (uint8_t)((mode + 1) % MODE_COUNT);
-            } else {
-                mode = (uint8_t)((mode + MODE_COUNT - 1) % MODE_COUNT);
-            }
-
+        if (ButtonPc15_WasPressed(now)) {
+            mode = (uint8_t)((mode + 1U) % MODE_COUNT);
             step = 0;
             last_frame = now;
             GpioDriver_SetLeds(PatternFrame(mode, step));

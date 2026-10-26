@@ -10,10 +10,10 @@ void GpioDriver_Init(void)
 
     GPIOD->ODR &= ~LED_PINS;
     GPIOD->MODER &= ~(0x3F << 26);
-    GPIOD->MODER |= (0x15 << 26);
-    GPIOD->OTYPER &= ~LED_PINS;
-    GPIOD->OSPEEDR &= ~(0x3F << 26);
-    GPIOD->PUPDR &= ~(0x3F << 26);
+    GPIOD->MODER |= (0x15 << 26); //In/out
+    GPIOD->OTYPER &= ~LED_PINS; //push-over/open-drain
+    GPIOD->OSPEEDR &= ~(0x3F << 26); //Я скорость
+    GPIOD->PUPDR &= ~(0x3F << 26); //земля/питание
 }
 
 void GpioDriver_SetLeds(uint8_t mask)

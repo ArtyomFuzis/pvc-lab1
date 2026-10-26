@@ -1,0 +1,3 @@
+../CustomDrivers/Src/clock_driver.c:7:16:WaitForRegister	32	static
+../CustomDrivers/Src/clock_driver.c:18:16:SwitchToHsi	8	static
+../CustomDrivers/Src/clock_driver.c:36:9:ClockDriver_Init	8	static

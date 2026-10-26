@@ -1,0 +1,2 @@
+../CustomDrivers/Src/keyboard_driver.c:9:9:KeyboardDriver_Init	8	static
+../CustomDrivers/Src/keyboard_driver.c:14:9:KeyboardDriver_ReadRow1Columns	16	static

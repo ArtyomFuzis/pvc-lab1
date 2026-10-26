@@ -1,0 +1,2 @@
+../CustomDrivers/Src/gpio_driver.c:6:6:GpioDriver_Init	4	static
+../CustomDrivers/Src/gpio_driver.c:19:6:GpioDriver_SetLeds	24	static

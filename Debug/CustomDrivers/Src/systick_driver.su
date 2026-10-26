@@ -1,0 +1,3 @@
+../CustomDrivers/Src/systick_driver.c:7:6:SystickDriver_Init	4	static
+../CustomDrivers/Src/systick_driver.c:18:6:SystickDriver_OnInterrupt	4	static
+../CustomDrivers/Src/systick_driver.c:23:10:SystickDriver_GetMilliseconds	4	static
