@@ -65,7 +65,7 @@ int main(void)
         uint32_t now = SystickDriver_GetMilliseconds();
 
         if (ButtonPc15_WasPressed(now)) {
-            mode = (uint8_t)((mode + 1U) % MODE_COUNT);
+            mode = (uint8_t)((mode + 1) % MODE_COUNT);
             step = 0;
             last_frame = now;
             GpioDriver_SetLeds(PatternFrame(mode, step));
